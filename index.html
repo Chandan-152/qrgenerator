@@ -64,6 +64,7 @@ body{background:#fff}.app{padding:0}.header,.controls{display:none!important}.qr
 
 <button id="generate" class="primary">Generate QR</button>
 <button id="reset" class="secondary">Reset</button>
+
 </section>
 
 <section id="qrCard" class="card qr">
@@ -71,6 +72,13 @@ body{background:#fff}.app{padding:0}.header,.controls{display:none!important}.qr
 <div id="qrcode"></div>
 <button id="print" class="primary">Print QR</button>
 <div class="note">Print button phone ke print dialog ko open karega.</div>
+
+<details style="margin-top:16px;text-align:left">
+  <summary style="cursor:pointer;font-weight:700;color:#4b5563;padding:8px 2px">Manual QR (rarely used)</summary>
+  <input id="manualText" type="text" placeholder="Enter any text/code"
+    style="width:100%;height:50px;margin-top:10px;border:1px solid #d5d9df;border-radius:11px;padding:0 12px;font-size:16px">
+  <button id="manualGenerate" class="secondary">Generate Manual QR</button>
+</details>
 </section>
 </main>
 
@@ -128,13 +136,41 @@ function updateLocation(){
 function render(){
  renderAisles();renderRacks();renderLevels();renderPositions();updateLocation();
 }
-$('generate').onclick=()=>{
- const code=locationEl.textContent;
+function generateQR(code){
+ code=(code||'').trim();
+ if(!code)return;
  $('qrcode').innerHTML='';
  $('qrLabel').textContent=code;
  new QRCode($('qrcode'),{text:code,width:250,height:250,correctLevel:QRCode.CorrectLevel.H});
  $('qrCard').style.display='block';
+}
+
+function autoGenerate(){
+ generateQR(locationEl.textContent);
+}
+
+// Manual button
+$('manualGenerate').onclick=()=>{
+ const value=$('manualText').value;
+ if(!value.trim()){
+   $('manualText').focus();
+   return;
+ }
+ generateQR(value);
  $('qrCard').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+// Keep the explicit Generate QR button too
+$('generate').onclick=()=>{
+ generateQR(locationEl.textContent);
+ $('qrCard').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+// Automatically regenerate whenever a standard location changes
+const originalUpdateLocation=updateLocation;
+updateLocation=function(){
+ originalUpdateLocation();
+ autoGenerate();
 };
 $('print').onclick=()=>window.print();
 $('reset').onclick=()=>{
@@ -144,6 +180,7 @@ $('reset').onclick=()=>{
  render();
 };
 render();
+autoGenerate();
 </script>
 </body>
 </html>
