@@ -350,14 +350,6 @@ button.active{
       placeholder="Enter any text / QR value"
     >
 
-    <button
-      id="manualGenerate"
-      class="manual-generate">
-
-      Generate QR
-
-    </button>
-
   </div>
 
 
@@ -780,50 +772,69 @@ $("manualToggle").onclick = function(){
 
 
 
+```js
 /* =====================================================
-   MANUAL QR GENERATE
+   MANUAL QR - AUTO GENERATE WHILE TYPING
 ===================================================== */
 
-$("manualGenerate").onclick = function(){
+$("manualToggle").onclick = function(){
 
-  const value =
-    $("manualInput").value.trim();
+  const box = $("manualBox");
 
+  box.classList.toggle("show");
 
-  /* Empty input */
-
-  if(!value){
+  if(box.classList.contains("show")){
 
     $("manualInput").focus();
+
+  }
+
+};
+
+
+/* Generate QR automatically when typing */
+
+$("manualInput").addEventListener("input", function(){
+
+  const value = this.value.trim();
+
+  if(!value){
 
     return;
 
   }
 
-
-  /* Generate manual QR */
-
   generateQR(value);
 
-
-  /* Show manual value */
-
-  $("qrLabel").textContent = value;
+});
 
 
-  /* Scroll to QR */
+/* Optional: Generate when Enter is pressed */
 
-  document
-    .querySelector(".qr-card")
-    .scrollIntoView({
+$("manualInput").addEventListener("keydown", function(event){
 
-      behavior:"smooth",
+  if(event.key === "Enter"){
 
-      block:"start"
+    const value = this.value.trim();
 
-    });
+    if(!value){
 
-};
+      return;
+
+    }
+
+    generateQR(value);
+
+    document
+      .querySelector(".qr-card")
+      .scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+      });
+
+  }
+
+});
 
 
 
